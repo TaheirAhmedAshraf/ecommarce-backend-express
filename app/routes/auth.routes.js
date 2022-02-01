@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const PRIVATE_KEY = fs.readFileSync("./private.key", "utf8");
+const SALT_ROUNDS = 10;
 
 router.post("/register", async (req, res) => {
   try {
@@ -17,7 +18,8 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    const passwordHash = bcrypt.hashSync(password, 10);
+    const salt = bcrypt.genSaltSync(SALT_ROUNDS);
+    const passwordHash = bcrypt.hashSync(password, salt);
 
     const user_id = `${new Date().getTime()}${Math.floor(
       Math.random() * 10000000
@@ -78,14 +80,33 @@ router.post("/login", async (req, res) => {
 
     const user = await UserModel.findOne({ email });
     const passwordHash = user?.passwordHash;
-    const isPasswordValid = bcrypt.compareSync(password, passwordHash, 10);
+    bcrypt.compare(password, passwordHash, (err, result) => {
+      if (!user || !result) {
+        res.status(400).json({
+          status: 400,
+          message: "Invalid email or password",
+        });
+      } else {
+        const access_token = jwt.sign(user.toJSON(), PRIVATE_KEY, {
+          expiresIn: "1h",
+        });
 
-    if (!user || !isPasswordValid) {
-      res.status(400).json({
-        status: 400,
-        message: "Invalid email or password",
-      });
-    }
+        const user_info = {
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email: user.email,
+          user_id: user.user_id,
+          creation_date: user.creation_date,
+        };
+
+        res.status(200).json({
+          message: "User created successfully",
+          status: 200,
+          user_info,
+          access_token,
+        });
+      }
+    });
   } catch (error) {
     res.status(500).json({
       message: "Error while logging in",
