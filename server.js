@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 8000;
 const { MONGO_URI } = process.env;
 
 // Routes
-const AuthRoutes = require("./routes/auth.routes");
+const AuthRoutes = require("./app/routes/auth.routes");
 app.use("/api/auth", AuthRoutes);
 
 app.listen(PORT, () => {
