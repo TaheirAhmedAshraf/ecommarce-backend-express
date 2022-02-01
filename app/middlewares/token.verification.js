@@ -1,5 +1,6 @@
 const fs = require("fs");
 const PRIVATE_KEY = fs.readFileSync("./private.key", "utf8");
+const jwt = require("jsonwebtoken");
 
 const TokenVerification = async (req, res, next) => {
   try {

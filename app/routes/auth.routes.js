@@ -34,7 +34,7 @@ router.post("/register", async (req, res) => {
       creation_date: new Date().getTime(),
     });
     console.log(user);
-    const access_token = jwt.sign(user.toJSON(), PRIVATE_KEY, {
+    const access_token = jwt.sign({ user }, PRIVATE_KEY, {
       expiresIn: "1h",
     });
 
@@ -87,7 +87,7 @@ router.post("/login", async (req, res) => {
           message: "Invalid email or password",
         });
       } else {
-        const access_token = jwt.sign(user.toJSON(), PRIVATE_KEY, {
+        const access_token = jwt.sign({ user }, PRIVATE_KEY, {
           expiresIn: "1h",
         });
 
